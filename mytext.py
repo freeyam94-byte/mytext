@@ -5,6 +5,22 @@ from google.cloud import translate
 from openai import OpenAI
 import os
 
+import base64
+from tempfile import NamedTemporaryFile
+
+# 1. base64로 인코딩된 키를 환경변수에서 읽고 디코딩하여 임시파일 생성
+key_b64 = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_B64")
+if key_b64 is None:
+    raise Exception("환경변수 GOOGLE_APPLICATION_CREDENTIALS_B64가 설정되지 않았습니다.")
+
+key_json = base64.b64decode(key_b64)
+with NamedTemporaryFile(delete=False, mode='wb', suffix='.json') as f:
+    f.write(key_json)
+    temp_key_path = f.name
+
+# 2. GOOGLE_APPLICATION_CREDENTIALS 환경변수를 임시파일 경로로 설정
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = temp_key_path
+
 app = Flask(__name__, static_folder='build')
 CORS(app)
 
