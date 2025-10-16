@@ -18,7 +18,7 @@ openai_client = OpenAI(api_key=openai_api_key)
 vision_client = vision.ImageAnnotatorClient()
 translate_client = translate.TranslationServiceClient()
 
-PROJECT_ID = "keen-precinct-475110-a5"  # 실제 프로젝트 ID로 변경
+PROJECT_ID = "mytext-475212"  # 실제 프로젝트 ID로 변경
 LOCATION = "global"
 
 def style_text_with_openai(text: str) -> str:
