@@ -1,41 +1,39 @@
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
-from google.cloud import vision
-from google.cloud import translate
-from openai import OpenAI
 import os
+from flask import Flask
+from flask_cors import CORS
+from google.cloud import vision, translate
+from openai import OpenAI
 
-import base64
-from tempfile import NamedTemporaryFile
+# GOOGLE_APPLICATION_CREDENTIALS 환경변수는 integration이 자동 설정함
 
-# 1. base64로 인코딩된 키를 환경변수에서 읽고 디코딩하여 임시파일 생성
-key_b64 = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_B64")
-if key_b64 is None:
-    raise Exception("환경변수 GOOGLE_APPLICATION_CREDENTIALS_B64가 설정되지 않았습니다.")
-
-key_json = base64.b64decode(key_b64)
-with NamedTemporaryFile(delete=False, mode='wb', suffix='.json') as f:
-    f.write(key_json)
-    temp_key_path = f.name
-
-# 2. GOOGLE_APPLICATION_CREDENTIALS 환경변수를 임시파일 경로로 설정
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = temp_key_path
-
+# Flask 앱 및 CORS 설정
 app = Flask(__name__, static_folder='build')
 CORS(app)
 
-# 인증 키는 환경변수를 통해 설정되므로 코드내 직접 경로 불필요
-vision_client = vision.ImageAnnotatorClient()
-translate_client = translate.TranslationServiceClient()
+# 환경변수에서 Google Cloud 인증 정보 바로 사용
+vision_client = vision.ImageAnnotatorClient(
+    credentials={
+        "client_email": os.getenv("GCP_SERVICE_ACCOUNT_EMAIL"),
+        "private_key": os.getenv("GCP_PRIVATE_KEY").replace("\\n", "\n"),
+    },
+    project=os.getenv("GCP_PROJECT_ID")
+)
 
+translate_client = translate.TranslationServiceClient(
+    credentials={
+        "client_email": os.getenv("GCP_SERVICE_ACCOUNT_EMAIL"),
+        "private_key": os.getenv("GCP_PRIVATE_KEY").replace("\\n", "\n"),
+    },
+    project=os.getenv("GCP_PROJECT_ID")
+)
+
+# OpenAI API 키 환경변수에서 읽기
 openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_client = OpenAI(api_key=openai_api_key)
 
-vision_client = vision.ImageAnnotatorClient()
-translate_client = translate.TranslationServiceClient()
-
-PROJECT_ID = "mytext-475212"  # 실제 프로젝트 ID로 변경
-LOCATION = "global"
+# 프로젝트 및 위치 정보도 환경변수로 관리
+PROJECT_ID = os.getenv("PROJECT_ID", "mytext-475212")
+LOCATION = os.getenv("LOCATION", "global")
 
 def style_text_with_openai(text: str) -> str:
     prompt = (
