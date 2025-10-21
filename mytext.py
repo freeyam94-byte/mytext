@@ -5,6 +5,12 @@ from flask_cors import CORS
 from google.cloud import vision, translate_v3 as translate
 from openai import OpenAI
 
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Hello, this is the home page."
+
 # 로깅 설정 (debug 레벨 이상 모두 출력)
 logging.basicConfig(level=logging.DEBUG)
 
