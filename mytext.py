@@ -7,7 +7,7 @@ from openai import OpenAI
 
 logging.basicConfig(level=logging.DEBUG)
 
-app = Flask(__name__, static_folder='public')
+app = Flask(__name__, static_folder='build')
 CORS(app)
 
 logging.debug(f"GCP_SERVICE_ACCOUNT_EMAIL: {os.getenv('GCP_SERVICE_ACCOUNT_EMAIL')}")
