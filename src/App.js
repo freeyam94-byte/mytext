@@ -48,7 +48,7 @@ function ProductPageGenerator() {
         return {
           ...imageData[index],
           translatedText: result,
-          editedText: `// 참고: 여기서 감성적인 문구로 수정하세요.\n${result}`
+          editedText: `// 참고: 여기서 추가 수정하세요.\n${result}`
         };
       } catch (error) {
         console.error("Error processing image:", error);
@@ -79,7 +79,7 @@ function ProductPageGenerator() {
       <html lang="ko">
       <head>
         <meta charset="UTF-8">
-        <title>상품 상세페이지</title>
+        <title>이미지 텍스트 번역</title>
         <style>
           body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
           .item-section { text-align: center; margin-bottom: 50px; }
@@ -113,7 +113,7 @@ function ProductPageGenerator() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '40px auto', padding: '20px', fontFamily: "'Pretendard', sans-serif" }}>
-      <h1 style={{ textAlign: 'center' }}>상세페이지 자동 생성기</h1>
+      <h1 style={{ textAlign: 'center' }}>이미지 텍스트 번역기</h1>
       
       {/* 1. 이미지 업로드 */}
       <div style={{ border: '2px dashed #ccc', padding: '20px', textAlign: 'center', marginBottom: '20px' }}>
