@@ -20,10 +20,17 @@ logging.debug(f"GCP_PROJECT_ID: {os.getenv('GCP_PROJECT_ID')}")
 logging.debug(f"OPENAI_API_KEY set: {'YES' if os.getenv('OPENAI_API_KEY') else 'NO'}")
 
 try:
-    # Google Cloud client libraries will automatically pick up credentials
-    # if GOOGLE_APPLICATION_CREDENTIALS environment variable is set.
-    vision_client = vision.ImageAnnotatorClient()
-    translate_client = translate.TranslationServiceClient()
+    credentials_info = {
+        "type": "service_account",
+        "client_email": os.getenv("GCP_SERVICE_ACCOUNT_EMAIL"),
+        "private_key": os.getenv("GCP_PRIVATE_KEY").replace("\\n", "\n"),
+        "project_id": os.getenv("GCP_PROJECT_ID"),
+        "token_uri": "https://oauth2.googleapis.com/token",
+    }
+    credentials = service_account.Credentials.from_service_account_info(credentials_info)
+
+    vision_client = vision.ImageAnnotatorClient(credentials=credentials)
+    translate_client = translate.TranslationServiceClient(credentials=credentials)
     logging.debug("Google Cloud clients initialized successfully.")
 except Exception as e:
     logging.error(f"Error initializing Google Cloud clients: {str(e)}")
