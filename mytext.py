@@ -3,6 +3,7 @@ import logging
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from google.cloud import vision, translate_v3 as translate
+from google.oauth2 import service_account
 from openai import OpenAI
 
 logging.basicConfig(level=logging.DEBUG)
@@ -10,25 +11,19 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__, static_folder='build')
 CORS(app)
 
+vision_client = None
+translate_client = None
+openai_client = None
+
 logging.debug(f"GCP_SERVICE_ACCOUNT_EMAIL: {os.getenv('GCP_SERVICE_ACCOUNT_EMAIL')}")
 logging.debug(f"GCP_PROJECT_ID: {os.getenv('GCP_PROJECT_ID')}")
 logging.debug(f"OPENAI_API_KEY set: {'YES' if os.getenv('OPENAI_API_KEY') else 'NO'}")
 
 try:
-    vision_client = vision.ImageAnnotatorClient(
-        credentials={
-            "client_email": os.getenv("GCP_SERVICE_ACCOUNT_EMAIL"),
-            "private_key": os.getenv("GCP_PRIVATE_KEY").replace("\\n", "\n"),
-            "project_id": os.getenv("GCP_PROJECT_ID"),
-        }
-    )
-    translate_client = translate.TranslationServiceClient(
-        credentials={
-            "client_email": os.getenv("GCP_SERVICE_ACCOUNT_EMAIL"),
-            "private_key": os.getenv("GCP_PRIVATE_KEY").replace("\\n", "\n"),
-            "project_id": os.getenv("GCP_PROJECT_ID"),
-        }
-    )
+    # Google Cloud client libraries will automatically pick up credentials
+    # if GOOGLE_APPLICATION_CREDENTIALS environment variable is set.
+    vision_client = vision.ImageAnnotatorClient()
+    translate_client = translate.TranslationServiceClient()
     logging.debug("Google Cloud clients initialized successfully.")
 except Exception as e:
     logging.error(f"Error initializing Google Cloud clients: {str(e)}")
@@ -56,6 +51,10 @@ def process_image():
         logging.error("No image file in request")
         return jsonify({"error": "No image file"}), 400
 
+    if vision_client is None:
+        logging.error("Google Cloud Vision client not initialized.")
+        return jsonify({"error": "Server configuration error: Vision client not available."}), 500
+
     try:
         image_file = request.files["image"]
         content = image_file.read()
@@ -71,6 +70,10 @@ def process_image():
         else:
             chinese_text = ""
             logging.warning("No text detected in image")
+
+        if translate_client is None:
+            logging.error("Google Cloud Translate client not initialized.")
+            return jsonify({"error": "Server configuration error: Translate client not available."}), 500
 
         project_id = os.getenv("GCP_PROJECT_ID")
         location = "global"
@@ -97,6 +100,10 @@ def process_image():
         return jsonify({"error": str(e)}), 500
 
 def style_text_with_openai(text: str) -> str:
+    if openai_client is None:
+        logging.error("OpenAI client not initialized.")
+        return text
+
     prompt = f"Text: {text}\nPlease style the above text to be more natural."
     try:
         completion = openai_client.chat.completions.create(

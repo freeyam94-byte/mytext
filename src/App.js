@@ -37,18 +37,18 @@ function ProductPageGenerator() {
       
       try {
         // 백엔드(Python) 서버로 이미지 전송 및 결과 수신
-        const response = await axios.post('http://localhost:5000/process-image', formData, {
+        const response = await axios.post('/api/process-image', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         });
 
         // 수신된 데이터로 상태 업데이트
-        const { translated_text } = response.data;
+        const { result } = response.data;
         return {
           ...imageData[index],
-          translatedText: translated_text,
-          editedText: `// 참고: 여기서 감성적인 문구로 수정하세요.\n${translated_text}`
+          translatedText: result,
+          editedText: `// 참고: 여기서 감성적인 문구로 수정하세요.\n${result}`
         };
       } catch (error) {
         console.error("Error processing image:", error);
