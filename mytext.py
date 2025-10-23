@@ -110,7 +110,7 @@ def style_text_with_openai(text: str) -> str:
         logging.error("OpenAI client not initialized.")
         return text
 
-    prompt = f"다음 텍스트를 한국어로 더 자연스럽게 다듬어 주세요: {text}"
+    prompt = f"다음 텍스트를 자연스러운 한국어로 번역하고 다듬어 주세요. 만약 이미 한국어라면, 더욱 자연스럽고 매력적으로 다듬어 주세요: {text}"
     try:
         completion = openai_client.chat.completions.create(
             model="gpt-3.5-turbo",
