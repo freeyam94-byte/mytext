@@ -90,7 +90,6 @@ def process_image():
             "parent": parent,
             "contents": [chinese_text],
             "mime_type": "text/plain",
-            "source_language_code": "zh",
             "target_language_code": "ko",
         }
         translate_response = translate_client.translate_text(request=translate_request)
@@ -111,7 +110,7 @@ def style_text_with_openai(text: str) -> str:
         logging.error("OpenAI client not initialized.")
         return text
 
-    prompt = f"Text: {text}\nPlease style the above text to be more natural."
+    prompt = f"다음 텍스트를 한국어로 더 자연스럽게 다듬어 주세요: {text}"
     try:
         completion = openai_client.chat.completions.create(
             model="gpt-3.5-turbo",
