@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios'; // 백엔드 서버와 통신하기 위한 라이브러리
+import './ProductPageGenerator.css';
 
 function ProductPageGenerator() {
   // 상태 변수 설정
@@ -112,30 +113,30 @@ function ProductPageGenerator() {
   };
 
   return (
-    <div style={{ maxWidth: '900px', margin: '40px auto', padding: '20px', fontFamily: "'Pretendard', sans-serif" }}>
-      <h1 style={{ textAlign: 'center' }}>이미지 텍스트 번역기</h1>
+    <div className="product-page-generator">
+      <h1>이미지 텍스트 번역기</h1>
       
       {/* 1. 이미지 업로드 */}
-      <div style={{ border: '2px dashed #ccc', padding: '20px', textAlign: 'center', marginBottom: '20px' }}>
+      <div className="upload-section">
         <input type="file" accept="image/*" multiple onChange={handleImageChange} />
       </div>
 
-      <button onClick={handleProcessImages} disabled={isLoading} style={{ width: '100%', padding: '15px', fontSize: '18px', cursor: 'pointer' }}>
+      <button onClick={handleProcessImages} disabled={isLoading} className="process-button">
         {isLoading ? '처리 중...' : '번역 및 텍스트 생성'}
       </button>
 
       {/* 2. 이미지 미리보기 및 텍스트 편집 */}
-      <div style={{ marginTop: '30px' }}>
+      <div className="image-data-container">
         {imageData.map((item, index) => (
-          <div key={index} style={{ display: 'flex', gap: '20px', marginBottom: '30px', borderBottom: '1px solid #eee', paddingBottom: '30px' }}>
-            <img src={item.url} alt={`preview-${index}`} style={{ width: '300px', height: 'auto', objectFit: 'contain' }} />
-            <div style={{ flex: 1 }}>
+          <div key={index} className="image-data-item">
+            <img src={item.url} alt={`preview-${index}`} className="preview-image" />
+            <div className="text-editor-section">
               <h4>번역된 텍스트 (수정 가능)</h4>
               <p><strong>참고 스타일:</strong> 보내주신 예시처럼 감성적이고 부드러운 문구로 다듬어보세요. (예: "일상에 특별함을 더해 줄 작은 포인트")</p>
               <textarea
                 value={item.editedText}
                 onChange={(e) => handleTextChange(index, e.target.value)}
-                style={{ width: '100%', height: '200px', fontSize: '15px', lineHeight: 1.6, padding: '10px' }}
+                className="text-editor"
               />
             </div>
           </div>
@@ -144,7 +145,7 @@ function ProductPageGenerator() {
       
       {/* 3. 다운로드 */}
       {imageData.length > 0 && !isLoading && (
-        <button onClick={handleDownload} style={{ width: '100%', padding: '15px', fontSize: '18px', backgroundColor: '#4CAF50', color: 'white', border: 'none', cursor: 'pointer' }}>
+        <button onClick={handleDownload} className="download-button">
           최종 상세페이지 HTML 다운로드
         </button>
       )}
