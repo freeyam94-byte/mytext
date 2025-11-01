@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios'; // 백엔드 서버와 통신하기 위한 라이브러리
 import './ProductPageGenerator.css';
 
@@ -10,7 +10,7 @@ function ProductPageGenerator() {
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태
 
 
-  const handleFiles = (files) => {
+  const handleFiles = useCallback((files) => {
     setImageFiles(files);
     
     // 이미지 미리보기 URL 생성
@@ -21,7 +21,7 @@ function ProductPageGenerator() {
       editedText: ''
     }));
     setImageData(newImageData);
-  };
+  }, []);
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -47,7 +47,7 @@ function ProductPageGenerator() {
     return () => {
       window.removeEventListener('paste', handlePaste);
     };
-  }, []);
+  }, [handleFiles]);
 
   // '번역 및 텍스트 생성' 버튼 클릭 시 실행
   const handleProcessImages = async () => {
