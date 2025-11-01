@@ -109,3 +109,12 @@
     flex-direction: column;
   }
 }
+
+.upload-section.dragging {
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+.upload-section p {
+  color: #666;
+}

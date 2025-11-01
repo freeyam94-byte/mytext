@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios'; // 백엔드 서버와 통신하기 위한 라이브러리
 import './ProductPageGenerator.css';
 
@@ -8,6 +8,8 @@ function ProductPageGenerator() {
   const [imageData, setImageData] = useState([]); // 이미지별 데이터 (URL, 번역된 텍스트, 수정된 텍스트)
 
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태
+  const [isDragging, setIsDragging] = useState(false); // 드래그 상태
+  const dropRef = useRef(null);
 
 
   const handleFiles = useCallback((files) => {
@@ -42,12 +44,39 @@ function ProductPageGenerator() {
       }
     };
 
-    window.addEventListener('paste', handlePaste);
+    const dropElement = dropRef.current;
+    if (dropElement) {
+      dropElement.addEventListener('paste', handlePaste);
+    }
 
     return () => {
-      window.removeEventListener('paste', handlePaste);
+      if (dropElement) {
+        dropElement.removeEventListener('paste', handlePaste);
+      }
     };
   }, [handleFiles]);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    if (files && files.length > 0) {
+      handleFiles(files);
+    }
+  };
 
   // '번역 및 텍스트 생성' 버튼 클릭 시 실행
   const handleProcessImages = async () => {
@@ -153,12 +182,18 @@ function ProductPageGenerator() {
   }
 
   return (
-    <div className="product-page-generator">
+    <div className="product-page-generator" ref={dropRef} tabIndex="0">
       <h1>이미지 텍스트 번역기</h1>
       
       {/* 1. 이미지 업로드 */}
-      <div className="upload-section">
+      <div 
+        className={`upload-section ${isDragging ? 'dragging' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <input type="file" accept="image/*" multiple onChange={handleImageChange} />
+        <p>여기에 파일을 드래그하거나 클릭하여 업로드하세요.</p>
       </div>
 
       
