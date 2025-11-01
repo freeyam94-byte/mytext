@@ -206,7 +206,7 @@ def style_text_with_openai(text: str) -> str:
         return completion.choices[0].message.content.strip()
     except Exception as e:
         logging.error(f"Error calling OpenAI API: {str(e)}", exc_info=True)
-        return text
+        raise e
 
 if __name__ == "__main__":
     logging.debug("Starting Flask app")
