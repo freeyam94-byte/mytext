@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // 백엔드 서버와 통신하기 위한 라이브러리
 import './ProductPageGenerator.css';
 
@@ -6,11 +6,11 @@ function ProductPageGenerator() {
   // 상태 변수 설정
   const [imageFiles, setImageFiles] = useState([]); // 업로드한 이미지 파일
   const [imageData, setImageData] = useState([]); // 이미지별 데이터 (URL, 번역된 텍스트, 수정된 텍스트)
+
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태
 
-  // 이미지 파일 선택 시 실행
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
+
+  const handleFiles = (files) => {
     setImageFiles(files);
     
     // 이미지 미리보기 URL 생성
@@ -22,6 +22,32 @@ function ProductPageGenerator() {
     }));
     setImageData(newImageData);
   };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    handleFiles(files);
+  };
+
+  useEffect(() => {
+    const handlePaste = (event) => {
+      const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+      const files = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          files.push(items[i].getAsFile());
+        }
+      }
+      if (files.length > 0) {
+        handleFiles(files);
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+
+    return () => {
+      window.removeEventListener('paste', handlePaste);
+    };
+  }, []);
 
   // '번역 및 텍스트 생성' 버튼 클릭 시 실행
   const handleProcessImages = async () => {
@@ -65,6 +91,8 @@ function ProductPageGenerator() {
     setImageData(newData);
     setIsLoading(false);
   };
+
+
   
   // 수정된 텍스트 변경 시 상태 업데이트
   const handleTextChange = (index, value) => {
@@ -74,7 +102,7 @@ function ProductPageGenerator() {
   };
 
   // HTML 파일 생성 및 다운로드
-  const handleDownload = () => {
+  const handleDownloadHtml = () => {
     let htmlContent = `
       <!DOCTYPE html>
       <html lang="ko">
@@ -112,6 +140,18 @@ function ProductPageGenerator() {
     document.body.removeChild(link);
   };
 
+  const handleDownloadText = () => {
+    const textContent = imageData.map(item => item.editedText).join('\n\n---\n\n');
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'translated_text.txt');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   return (
     <div className="product-page-generator">
       <h1>이미지 텍스트 번역기</h1>
@@ -121,11 +161,15 @@ function ProductPageGenerator() {
         <input type="file" accept="image/*" multiple onChange={handleImageChange} />
       </div>
 
-      <button onClick={handleProcessImages} disabled={isLoading} className="process-button">
-        {isLoading ? '처리 중...' : '번역 및 텍스트 생성'}
-      </button>
+      
 
-      {/* 2. 이미지 미리보기 및 텍스트 편집 */}
+        <button onClick={handleProcessImages} disabled={isLoading} className="process-button">
+          {isLoading ? '처리 중...' : '번역 및 텍스트 생성'}
+        </button>
+
+
+
+      {/* 2. 결과 */}
       <div className="image-data-container">
         {imageData.map((item, index) => (
           <div key={index} className="image-data-item">
@@ -141,13 +185,19 @@ function ProductPageGenerator() {
             </div>
           </div>
         ))}
+
       </div>
       
       {/* 3. 다운로드 */}
       {imageData.length > 0 && !isLoading && (
-        <button onClick={handleDownload} className="download-button">
-          최종 상세페이지 HTML 다운로드
-        </button>
+        <>
+          <button onClick={handleDownloadText} className="download-button">
+            텍스트 다운로드
+          </button>
+          <button onClick={handleDownloadHtml} className="download-button">
+            최종 상세페이지 HTML 다운로드
+          </button>
+        </>
       )}
     </div>
   );

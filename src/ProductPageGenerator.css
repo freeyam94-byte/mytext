@@ -1,4 +1,3 @@
-
 .product-page-generator {
   max-width: 900px;
   margin: 40px auto;
@@ -22,6 +21,7 @@
   padding: 15px;
   font-size: 18px;
   cursor: pointer;
+  margin-bottom: 20px;
 }
 
 .image-data-container {
@@ -66,6 +66,29 @@
   color: white;
   border: none;
   cursor: pointer;
+  margin-top: 10px;
+}
+
+.feature-selector {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.feature-selector label {
+  cursor: pointer;
+}
+
+.image-comparison {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+.image-comparison > div {
+  flex: 1;
+  text-align: center;
 }
 
 @media (max-width: 768px) {
@@ -80,5 +103,9 @@
 
   .preview-image {
     width: 100%;
+  }
+
+  .image-comparison {
+    flex-direction: column;
   }
 }
